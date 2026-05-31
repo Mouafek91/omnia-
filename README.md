@@ -58,7 +58,7 @@ Extend NexForge without forking via Domain/Board/Protocol/Validator/Dashboard pl
 
 ## License
 
-MIT
+Apache
 =======
 # NexForge v6.0 — Proof of Concept (Repository omnia)
 
