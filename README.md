@@ -29,15 +29,19 @@ NexForge is a **compiler + hard kernel** that transforms a simple domain descrip
 NexForge uses a strict, unidirectional compiler pipeline that enforces static safety contracts before generating or executing the runtime kernel:
 
 ```mermaid
+graph TD
+    %% Define Professional Tech Styles
     classDef compile fill:#1f2937,stroke:#3b82f6,stroke-width:2px,color:#f3f4f6;
     classDef passes fill:#111827,stroke:#4b5563,stroke-width:1px,color:#9ca3af;
     classDef runtime fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5;
 
+    %% Compile-Time Pipeline
     YAML[YAML Specification File] --> Parser[Parser]
     Parser --> AI_Contract[AI Contract Gatekeeper]
     AI_Contract --> Arch_Validator[Arch Validator]
     Arch_Validator --> IR[Intermediate Representation - IR]
 
+    %% Compiler Passes Block
     subgraph Compiler_Passes["Compiler Passes - Static Verification"]
         IR --> Dep[Dependency Analysis]
         Dep --> Sched[Schedulability Analysis]
@@ -49,12 +53,15 @@ NexForge uses a strict, unidirectional compiler pipeline that enforces static sa
         Cap --> Backend[Backends Sim Engine]
     end
 
+    %% Runtime Block
     Backend --> Kernel[Runtime Kernel - Fixed Library]
     Kernel --> Replay[Replay Engine]
 
-    class YAML,Parser,AI_Contract,Arch_Validator,IR compile
-    class Dep,Sched,HW,Constraint,Z3,State,Cap,Backend passes
-    class Kernel,Replay runtime
+    %% Apply Styles (هذه السطور ضرورية لربط الألوان بالمربعات)
+    class YAML,Parser,AI_Contract,Arch_Validator,IR compile;
+    class Dep,Sched,HW,Constraint,Z3,State,Cap,Backend passes;
+    class Kernel,Replay runtime;
+
 ```
 
 ## ✅ What was actually achieved (Proof of Concept)
