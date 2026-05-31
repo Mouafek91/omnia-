@@ -1,0 +1,183 @@
+metadata:
+  name: ev_charger
+  version: "6.0.0"
+  description: "Level 2 EV Charging Station with thermal, ground fault, and connector safety"
+
+sensors:
+  - name: voltage_v
+    unit: V
+    min: 0.0
+    max: 260.0
+    default: 230.0
+    safety_class: TELEMETRY
+    safety_level: SIL1
+    rate_hz: 10
+    hal_channel: ADC_VOLTAGE
+
+  - name: current_a
+    unit: A
+    min: 0.0
+    max: 40.0
+    default: 0.0
+    safety_class: CRITICAL
+    safety_level: SIL2
+    rate_hz: 200
+    hal_channel: ADC_CURRENT
+
+  - name: temp_connector_c
+    unit: degC
+    min: -10.0
+    max: 120.0
+    default: 25.0
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    rate_hz: 10
+    hal_channel: I2C_TEMP_CONN
+
+  - name: ground_leakage_a
+    unit: A
+    min: 0.0
+    max: 1.0
+    default: 0.0
+    safety_class: CRITICAL
+    safety_level: SIL2
+    rate_hz: 50
+    hal_channel: ADC_GFCI
+
+  - name: plug_connected
+    unit: "1"
+    min: 0.0
+    max: 1.0
+    default: 1.0
+    safety_class: CRITICAL
+    safety_level: SIL2
+    rate_hz: 10
+    hal_channel: GPIO_PROXIMITY
+
+actuators:
+  - name: main_contactor
+    unit: "1"
+    min: 0.0
+    max: 1.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: GPIO_CONTACTOR
+
+  - name: pilot_pwm
+    unit: percent
+    min: 0.0
+    max: 100.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: PWM_CP
+
+  - name: cooling_fan
+    unit: percent
+    min: 0.0
+    max: 100.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: PWM_FAN
+
+physics:
+  states:
+    - { name: current_a, unit: A, initial: 0.0 }
+    - { name: temp_connector_c, unit: degC, initial: 25.0 }
+    - { name: ground_leakage_a, unit: A, initial: 0.0 }
+  equations:
+    # Pilot signal controls charge current ramp
+    current_a: "(pilot_pwm * 0.35 - current_a * 0.8)"
+    # I²R heating in connector + natural cooling
+    temp_connector_c: "(current_a * current_a * 0.015 - (temp_connector_c - 25.0) * 0.008)"
+    # Ground leakage decays naturally when no fault
+    ground_leakage_a: "(-ground_leakage_a * 5.0)"
+  disturbances:
+    - { name: ground_fault_event, affects: ground_leakage_a, magnitude: 0.06 }
+    - { name: connector_overheat_event, affects: temp_connector_c, magnitude: 105.0 }
+    - { name: plug_disconnect, affects: plug_connected, magnitude: 0.0 }
+
+contracts:
+  - name: overcurrent
+    assume: "True"
+    guarantee: "current_a <= 32.0"
+    reason: "Overcurrent exceeds Level 2 rating (32A)"
+    reason_ar: "تيار زائد يتجاوز سعة المحطة"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 100
+
+  - name: ground_fault
+    assume: "True"
+    guarantee: "ground_leakage_a <= 0.03"
+    reason: "Ground fault detected (RCB trip threshold 30mA)"
+    reason_ar: "عطل أرضي - خطر صدمة كهربائية"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 0
+
+  - name: connector_overtemp
+    assume: "True"
+    guarantee: "temp_connector_c <= 90.0"
+    reason: "Connector temperature exceeds safe limit"
+    reason_ar: "حرارة المقبس مرتفعة جداً"
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    debounce_ms: 2000
+
+  - name: arc_on_disconnect
+    assume: "plug_connected == 0.0"
+    guarantee: "current_a <= 0.5"
+    reason: "Current must drop when disconnected to prevent arcing"
+    reason_ar: "يجب فصل التيار عند نزع المقبس لمنع الشرارة"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 0
+
+control:
+  strategy: PID
+  target_sensor: current_a
+  output_actuator: pilot_pwm
+  setpoint: 16.0
+  params:
+    kp: 1.2
+    ki: 0.05
+    kd: 0.1
+    out_min: 0.0
+    out_max: 100.0
+
+timing:
+  safety_loop_hz: 100
+  control_loop_hz: 50
+  telemetry_hz: 10
+  watchdog_timeout_ms: 500
+  max_jitter_ms: 5
+
+deployment:
+  target: esp32
+  dual_core: true
+  safety_core: 0
+  comm_core: 1
+
+faults:
+  regions:
+    - name: default
+      sensors: [voltage_v, current_a, temp_connector_c, ground_leakage_a, plug_connected]
+      actuators: [main_contactor, pilot_pwm, cooling_fan]
+      contracts: []
+      isolation_level: 0
+    - name: power_stage
+      sensors: [voltage_v, current_a]
+      actuators: [main_contactor, pilot_pwm]
+      contracts: [overcurrent, ground_fault, arc_on_disconnect]
+      isolation_level: 2
+      degraded_state: EMERGENCY
+    - name: thermal
+      sensors: [temp_connector_c]
+      actuators: [cooling_fan]
+      contracts: [connector_overtemp]
+      isolation_level: 1
+      degraded_state: DEGRADED
+      recovery_allowed: true
+  detect_sensor_stuck: true
+  detect_sensor_oor: true
+  detect_timing_overrun: true

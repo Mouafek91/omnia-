@@ -1,0 +1,89 @@
+Metadata-Version: 2.4
+Name: nexforge
+Version: 6.0.0
+Summary: AI-Native Cyber-Physical System Engineering Framework
+Author: NexForge Contributors
+License: MIT
+Keywords: cps,safety,iot,compiler,embedded
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Software Development :: Compilers
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: typer>=0.9.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: pyyaml>=6.0.0
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: scipy>=1.10.0
+Requires-Dist: matplotlib>=3.7.0
+Requires-Dist: msgspec>=0.18.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: z3-solver>=4.12.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+
+# NexForge v6.0
+
+**AI-Native Cyber-Physical System Engineering Framework**
+
+A deterministic compiler infrastructure for generating safe, auditable,
+production-grade Cyber-Physical Systems from human- or AI-authored
+domain specifications.
+
+> **NexForge is not an AI code generator.**
+> It is a **CPS synthesis compiler** where AI is one frontend among many.
+
+## Quick Start
+
+
+## The 15 Immutable Laws
+
+1. Invariants are DATA, never executable code.
+2. AI never writes runtime logic.
+3. Generated systems are deterministic.
+4. Safety path is isolated from communication.
+5. Runtime owns execution, AI owns specification only.
+6. Every CPS domain compiles into the same execution contract.
+7. Physics, Safety, Control are orthogonal layers.
+8. All artifacts are reproducible (content-addressed IR).
+9. No `eval`/`exec` anywhere.
+10. Fail-safe > availability.
+11. Timing is part of the architecture.
+12. Contracts are assume/guarantee with temporal bounds.
+13. The architecture itself is an executable contract.
+14. Hardware capability is a first-class compiler input.
+15. Deterministic replay is mandatory.
+
+## Architecture
+
+
+## The AI Contract
+
+AI may modify **only**: `domains/*.yaml`, `scenarios/`, `docs/`, `tests/`.
+AI is **forbidden** from modifying: runtime kernel, compiler passes,
+IR schema, architecture validator, safe evaluator.
+
+## Plugin SDK
+
+Extend NexForge without forking via Domain/Board/Protocol/Validator/Dashboard plugins.
+
+## Bundled Domains
+
+- `pump` — Water pump protection (4 sensors, 3 contracts)
+- `cold_storage` — Industrial cold room
+- `elevator` — Elevator safety
+- `drone` — Quadcopter flight controller
+- `nuclear_reactor` — Small modular reactor
+
+## Scenarios Library
+
+- `motor_failure`, `sensor_stuck`, `overheating`, `noisy_signal`, `packet_loss`
+
+## License
+
+MIT

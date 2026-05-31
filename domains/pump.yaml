@@ -1,0 +1,152 @@
+memetadata:
+  name: pump
+  version: "6.0.0"
+  description: "Water pump with dry-run, overcurrent, overtemperature protection"
+
+sensors:
+  - name: flow_lpm
+    unit: L/min
+    min: 0.0
+    max: 50.0
+    default: 0.0
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    rate_hz: 100
+    hal_channel: ADC_FLOW
+
+  - name: current_a
+    unit: A
+    min: 0.0
+    max: 20.0
+    default: 0.0
+    safety_class: CRITICAL
+    safety_level: SIL2
+    rate_hz: 200
+    hal_channel: ADC_CURRENT
+
+  - name: voltage_v
+    unit: V
+    min: 0.0
+    max: 260.0
+    default: 230.0
+    safety_class: TELEMETRY
+    rate_hz: 10
+    hal_channel: ADC_VOLTAGE
+
+  - name: temp_c
+    unit: degC
+    min: -10.0
+    max: 120.0
+    default: 25.0
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    rate_hz: 10
+    hal_channel: I2C_TEMP
+
+actuators:
+  - name: relay
+    unit: "1"
+    min: 0.0
+    max: 1.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: GPIO_RELAY
+
+  - name: pwm_speed
+    unit: percent
+    min: 0.0
+    max: 100.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: PWM_SPEED
+
+physics:
+  states:
+    - { name: flow_lpm, unit: L/min, initial: 0.0 }
+    - { name: temp_c,   unit: degC,  initial: 25.0 }
+    - { name: current_a, unit: A,     initial: 0.0 }
+  equations:
+    # Faster drive & damping (settles in ~2s)
+    flow_lpm: "(pwm_speed * 0.20 - flow_lpm * 0.4)"
+    temp_c:   "(pwm_speed * 0.015 - (temp_c - 25.0) * 0.008)"
+    current_a: "((pwm_speed * 0.08) - current_a) * 8.0"
+  disturbances:
+    - { name: dry_run, affects: flow_lpm, magnitude: 0.0 }
+    - { name: stall,   affects: current_a, magnitude: 15.0 }
+
+contracts:
+  - name: dry_run
+    assume: "voltage_v > 100.0"
+    guarantee: "not (current_a > 0.5 and flow_lpm < 0.5)"
+    reason: "Dry-run: current without flow"
+    reason_ar: "جفاف: تيار بدون تدفق"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 500
+
+  - name: overcurrent
+    assume: "True"
+    guarantee: "current_a <= 10.0"
+    reason: "Overcurrent — immediate burnout risk"
+    reason_ar: "تيار زائد"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 0
+
+  - name: overtemp
+    assume: "True"
+    guarantee: "temp_c <= 85.0"
+    reason: "Overtemperature — preventive shutdown"
+    reason_ar: "حرارة زائدة"
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    debounce_ms: 2000
+
+control:
+  strategy: PID
+  target_sensor: flow_lpm
+  output_actuator: pwm_speed
+  setpoint: 12.0
+  params:
+    kp: 1.2    # ← Faster response
+    ki: 0.15   # ← Eliminates steady-state error quickly
+    kd: 0.05
+    out_min: 0.0
+    out_max: 100.0
+
+timing:
+  safety_loop_hz: 100
+  control_loop_hz: 50
+  telemetry_hz: 10
+  watchdog_timeout_ms: 500
+  max_jitter_ms: 5
+
+deployment:
+  target: esp32
+  dual_core: true
+  safety_core: 0
+  comm_core: 1
+
+faults:
+  regions:
+    - name: default
+      sensors: [flow_lpm, current_a, voltage_v, temp_c]
+      actuators: [relay, pwm_speed]
+      contracts: []
+      isolation_level: 0
+    - name: power_stage
+      sensors: [current_a, voltage_v]
+      actuators: [relay, pwm_speed]
+      contracts: [dry_run, overcurrent]
+      isolation_level: 2
+      degraded_state: EMERGENCY
+    - name: thermal
+      sensors: [temp_c]
+      actuators: [relay]
+      contracts: [overtemp]
+      isolation_level: 1
+      degraded_state: DEGRADED
+      recovery_allowed: true
+  detect_sensor_stuck: true
+  detect_sensor_oor: true
+  detect_timing_overrun: true

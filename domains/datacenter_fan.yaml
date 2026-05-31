@@ -1,0 +1,207 @@
+metadata:
+  name: datacenter_fan
+  version: "6.0.0"
+  description: "Server rack cooling fan with thermal, mechanical, and electrical safety monitoring"
+
+sensors:
+  - name: rpm
+    unit: "1"
+    min: 0.0
+    max: 5000.0
+    default: 0.0
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    rate_hz: 50
+    hal_channel: TACH_INPUT
+
+  - name: temp_motor_c
+    unit: degC
+    min: -10.0
+    max: 150.0
+    default: 25.0
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    rate_hz: 10
+    hal_channel: I2C_TEMP_MOTOR
+
+  - name: temp_bearing_c
+    unit: degC
+    min: -10.0
+    max: 150.0
+    default: 25.0
+    safety_class: CRITICAL
+    safety_level: SIL2
+    rate_hz: 10
+    hal_channel: I2C_TEMP_BEARING
+
+  - name: current_a
+    unit: A
+    min: 0.0
+    max: 5.0
+    default: 0.0
+    safety_class: CRITICAL
+    safety_level: SIL2
+    rate_hz: 200
+    hal_channel: ADC_CURRENT
+
+  - name: vibration_mm_s
+    unit: "1"
+    min: 0.0
+    max: 50.0
+    default: 0.0
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    rate_hz: 50
+    hal_channel: ADC_VIBRATION
+
+actuators:
+  - name: pwm_speed
+    unit: percent
+    min: 0.0
+    max: 100.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: PWM_FAN
+
+  - name: power_relay
+    unit: "1"
+    min: 0.0
+    max: 1.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: GPIO_RELAY
+
+  - name: alarm_buzzer
+    unit: "1"
+    min: 0.0
+    max: 1.0
+    default: 0.0
+    fail_safe_value: 0.0
+    hal_channel: GPIO_BUZZER
+
+physics:
+  states:
+    - { name: rpm, unit: "1", initial: 0.0 }
+    - { name: temp_motor_c, unit: degC, initial: 25.0 }
+    - { name: temp_bearing_c, unit: degC, initial: 25.0 }
+    - { name: current_a, unit: A, initial: 0.0 }
+    - { name: vibration_mm_s, unit: "1", initial: 0.0 }
+  equations:
+    # RPM tracks PWM with mechanical inertia
+    rpm: "(pwm_speed * 50.0 - rpm * 0.4)"
+    # Motor heating: I²R + speed friction - natural cooling
+    temp_motor_c: "(current_a * current_a * 0.8 + rpm * 0.002 - (temp_motor_c - 25.0) * 0.015)"
+    # Bearing temp: speed friction + motor heat transfer - dissipation
+    temp_bearing_c: "(rpm * 0.008 + temp_motor_c * 0.01 - (temp_bearing_c - 25.0) * 0.01)"
+    # Current: PWM base load + speed-dependent back-EMF effect
+    current_a: "(pwm_speed * 0.05 + rpm * 0.0005)"
+    # Vibration: baseline + speed proportional (simplified mechanical model)
+    vibration_mm_s: "(rpm * 0.015 + 0.5)"
+  disturbances:
+    - { name: bearing_failure, affects: vibration_mm_s, magnitude: 15.0 }
+    - { name: fan_stall, affects: rpm, magnitude: 0.0 }
+    - { name: dust_clogging, affects: rpm, magnitude: 0.0 }
+
+contracts:
+  - name: overcurrent
+    assume: "True"
+    guarantee: "current_a <= 3.0"
+    reason: "Motor current exceeds safe operating limit"
+    reason_ar: "تيار المحرك تجاوز الحد الآمن"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 100
+
+  - name: motor_overtemp
+    assume: "True"
+    guarantee: "temp_motor_c <= 90.0"
+    reason: "Motor winding temperature exceeds insulation rating"
+    reason_ar: "حرارة ملفات المحرك تجاوزت العزل"
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    debounce_ms: 3000
+
+  - name: bearing_overtemp
+    assume: "True"
+    guarantee: "temp_bearing_c <= 100.0"
+    reason: "Bearing temperature indicates lubrication failure"
+    reason_ar: "حرارة المحامل تشير لفشل التزييت"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 2000
+
+  - name: excessive_vibration
+    assume: "True"
+    guarantee: "vibration_mm_s <= 10.0"
+    reason: "Excessive vibration indicates imbalance or bearing collapse"
+    reason_ar: "اهتزاز مفرط يشير لاختلال أو انهيار محمل"
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    debounce_ms: 500
+
+  - name: fan_stall
+    assume: "pwm_speed > 30.0"
+    guarantee: "rpm > 500.0"
+    reason: "Fan stalled despite high PWM command"
+    reason_ar: "المروحة متوقفة رغم أمر الدوران العالي"
+    safety_class: CRITICAL
+    safety_level: SIL2
+    debounce_ms: 1000
+
+  - name: overspeed
+    assume: "True"
+    guarantee: "rpm <= 4500.0"
+    reason: "Overspeed risks mechanical disintegration"
+    reason_ar: "سرعة زائدة خطر تفكك ميكانيكي"
+    safety_class: IMPORTANT
+    safety_level: SIL1
+    debounce_ms: 200
+
+control:
+  strategy: PID
+  target_sensor: temp_motor_c
+  output_actuator: pwm_speed
+  setpoint: 45.0
+  params:
+    kp: 1.5
+    ki: 0.02
+    kd: 0.1
+    out_min: 0.0
+    out_max: 100.0
+
+timing:
+  safety_loop_hz: 100
+  control_loop_hz: 50
+  telemetry_hz: 10
+  watchdog_timeout_ms: 500
+  max_jitter_ms: 5
+
+deployment:
+  target: esp32
+  dual_core: true
+  safety_core: 0
+  comm_core: 1
+
+faults:
+  regions:
+    - name: default
+      sensors: [rpm, temp_motor_c, temp_bearing_c, current_a, vibration_mm_s]
+      actuators: [pwm_speed, power_relay, alarm_buzzer]
+      contracts: []
+      isolation_level: 0
+    - name: electrical
+      sensors: [current_a, temp_motor_c]
+      actuators: [power_relay, pwm_speed]
+      contracts: [overcurrent, motor_overtemp]
+      isolation_level: 2
+      degraded_state: EMERGENCY
+    - name: mechanical
+      sensors: [rpm, temp_bearing_c, vibration_mm_s]
+      actuators: [pwm_speed, alarm_buzzer]
+      contracts: [bearing_overtemp, excessive_vibration, fan_stall, overspeed]
+      isolation_level: 1
+      degraded_state: DEGRADED
+      recovery_allowed: true
+  detect_sensor_stuck: true
+  detect_sensor_oor: true
+  detect_timing_overrun: true
