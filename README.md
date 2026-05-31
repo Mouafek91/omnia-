@@ -134,7 +134,7 @@ Examples that can be added right now: elevator, cold_storage, drone, nuclear_rea
 
 ```bash
 git clone https://github.com/Mouafek91/omnia-.git
-cd omnia-/nexforge-v6          # or cd nexforge-v6 if you cloned directly
+cd omnia-
 pip install -e .[dev]
 nexforge list-domains
 nexforge compile domains/pump.yaml
@@ -146,13 +146,11 @@ pytest
 You can also run custom scenarios using the provided scripts:
 
 ```powershell
-python run_sim_overheating.py          # to see overheating VETO
 python "run_sim motor failure - Copy.py"   # for motor failure
+python run_sim_overheating.py          # to see overheating VETO
 python run_sim_ev_charger.py           # for the EV charger
 python run_sim_datacenter_fan.py       # for the data center fan
 ```
-
----
 
 ## 👥 For Contributors
 
