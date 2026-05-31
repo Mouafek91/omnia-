@@ -136,10 +136,44 @@ Examples that can be added right now: elevator, cold_storage, drone, nuclear_rea
 git clone https://github.com/Mouafek91/omnia-.git
 cd omnia-
 pip install -e .[dev]
+pip install z3-solver
 nexforge list-domains
 nexforge compile domains/pump.yaml
 nexforge simulate domains/pump.yaml -d 10 --scenario motor_failure --record sessions/run.json
 pytest
+```
+
+**Expected test output (17/17 passing):**
+
+```
+tests/test_arch_validator.py::test_valid_pump_passes PASSED
+tests/test_arch_validator.py::test_missing_sensor_reference_caught PASSED
+tests/test_arch_validator.py::test_duplicate_names_caught PASSED
+tests/test_events.py::test_priority_ordering PASSED
+tests/test_events.py::test_bounded_queue_drops PASSED
+tests/test_pipeline.py::test_pump_compiles PASSED
+tests/test_pipeline.py::test_bad_unit_rejected PASSED
+tests/test_replay.py::test_session_roundtrip PASSED
+tests/test_replay.py::test_replay_detects_hash_mismatch PASSED
+tests/test_scenarios.py::test_builtin_scenarios_registered PASSED
+tests/test_scenarios.py::test_scenario_applicability PASSED
+tests/test_scenarios.py::test_scenario_disturbances_deterministic PASSED
+tests/test_units.py::test_add_same_unit PASSED
+tests/test_units.py::test_add_different_units_fails PASSED
+tests/test_units.py::test_multiply_units PASSED
+tests/test_units.py::test_sin_requires_dimensionless PASSED
+tests/test_units.py::test_evaluate_arithmetic PASSED
+
+=================== 17 passed in 0.56s ===================
+```
+
+**You can also run custom scenarios:**
+
+```powershell
+python "run_sim motor failure - Copy.py"   # Motor failure → VETO
+python run_sim_overheating.py              # Overheating → VETO
+python run_sim_ev_charger.py               # EV charger → VETO
+python run_sim_datacenter_fan.py           # Data center fan → VETO
 ```
 
 > **Note:** `nexforge replay` requires the exact same YAML file used during recording. If you modify the YAML, re-record the session first.
