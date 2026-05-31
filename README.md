@@ -171,7 +171,7 @@ tests/test_units.py::test_evaluate_arithmetic PASSED
 
 ```powershell
 python "run_sim motor failure - Copy.py"   # Motor failure → VETO
-python "run_sim_overheating - Copy"              # Overheating → VETO
+python "run_sim_overheating - Copy.py"              # Overheating → VETO
 python run_sim_ev_charger.py               # EV charger → VETO
 python run_sim_datacenter_fan.py           # Data center fan → VETO
 ```
