@@ -4,6 +4,7 @@
 
 > We don't ask AI to "write safe code".
 > We place it inside a **fixed, rigid architecture** that forces it to produce deterministic, safe systems.
+**Keywords:** CPS, Safety-Critical Systems, IoT Security, Embedded Systems, Formal Verification, Deterministic Compiler, Functional Safety, YAML-driven, VETO-first, Constrained Architecture, Industrial Automation, Robotics
 
 ---
 
