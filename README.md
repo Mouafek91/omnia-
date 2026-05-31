@@ -29,19 +29,16 @@ NexForge uses a strict, unidirectional compiler pipeline that enforces static sa
 
 ```mermaid
 graph TD
-    %% Define Styles
-    classDef compile fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef passes fill:#bbf,stroke:#333,stroke-width:1px;
-    classDef runtime fill:#bfb,stroke:#333,stroke-width:2px;
+    classDef compile fill:#f9f,stroke:#333,stroke-width:2px
+    classDef passes fill:#bbf,stroke:#333,stroke-width:1px
+    classDef runtime fill:#bfb,stroke:#333,stroke-width:2px
 
-    %% Compile-Time Pipeline
     YAML[YAML Specification File] --> Parser[Parser]
     Parser --> AI_Contract[AI Contract Gatekeeper]
     AI_Contract --> Arch_Validator[Arch Validator]
     Arch_Validator --> IR[Intermediate Representation - IR]
 
-    %% Compiler Passes Block
-    subgraph Compiler Passes (Static Verification)
+    subgraph Compiler_Passes["Compiler Passes - Static Verification"]
         IR --> Dep[Dependency Analysis]
         Dep --> Sched[Schedulability Analysis]
         Sched --> HW[Hardware Resource Check]
@@ -52,14 +49,13 @@ graph TD
         Cap --> Backend[Backends Sim Engine]
     end
 
-    %% Runtime Block
     Backend --> Kernel[Runtime Kernel - Fixed Library]
     Kernel --> Replay[Replay Engine]
 
-    %% Apply Styles
-    class YAML,Parser,AI_Contract,Arch_Validator,IR compile;
-    class Dep,Sched,HW,Constraint,Z3,State,Cap,Backend passes;
-    class Kernel,Replay runtime;
+    class YAML,Parser,AI_Contract,Arch_Validator,IR compile
+    class Dep,Sched,HW,Constraint,Z3,State,Cap,Backend passes
+    class Kernel,Replay runtime
+```
 
 ## ✅ What was actually achieved (Proof of Concept)
 
