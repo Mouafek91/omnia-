@@ -22,6 +22,7 @@ NexForge is a **compiler + hard kernel** that transforms a simple domain descrip
 **All of this from a single YAML file – without writing any runtime code.**
 
 ---
+
 ## 🏗️ System Architecture
 
 NexForge uses a strict, unidirectional compiler pipeline that enforces static safety contracts before generating or executing the runtime kernel:
