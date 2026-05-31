@@ -139,18 +139,10 @@ pip install -e .[dev]
 nexforge list-domains
 nexforge compile domains/pump.yaml
 nexforge simulate domains/pump.yaml -d 10 --scenario motor_failure --record sessions/run.json
-nexforge replay sessions/run.json --domain domains/pump.yaml
 pytest
 ```
 
-You can also run custom scenarios using the provided scripts:
-
-```powershell
-python "run_sim motor failure - Copy.py"   # for motor failure
-python run_sim_overheating.py          # to see overheating VETO
-python run_sim_ev_charger.py           # for the EV charger
-python run_sim_datacenter_fan.py       # for the data center fan
-```
+> **Note:** `nexforge replay` requires the exact same YAML file used during recording. If you modify the YAML, re-record the session first.
 
 ## 👥 For Contributors
 
