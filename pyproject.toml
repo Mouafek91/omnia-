@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 [project]
 name = "nexforge"
 version = "6.0.0"
@@ -90,4 +90,4 @@ include = ["nexforge*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
->>>>>>> 17b0418db9fc6d0b157813b53a6dd4f1649e0c23
+
