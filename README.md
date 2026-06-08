@@ -36,7 +36,9 @@ NexForge is a **compiler + hard kernel** that transforms a simple domain descrip
 NexForge is the only open‑source project that attempts to unify safety across:
 
 · Hardware-level safety (e.g., MicroSafe‑RL for embedded clipping)
+
 · Communication infrastructure (e.g., safe_drive for ROS2 or any real‑time middleware)
+
 . High‑level orchestration (e.g., apyrobo for skill‑based execution).
 
 under a single, verifiable YAML specification. If you care about making physical AI safe and deterministic, this is the place to build.
