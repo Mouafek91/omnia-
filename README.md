@@ -209,25 +209,43 @@ python run_sim_datacenter_fan.py           # Data center fan → VETO
 
 All contributions are welcome! The project is still in the Early Prototype stage, and your contribution will shape its future.
 
-### ✅ What you can contribute (recommended and safe)
+### ✅ What you can contribute
 
-| Area | What to do |
-|------|------------|
-| Adding YAML domains | Put your file in `domains/` (elevator, fridge, fan, robot…) |
-| Fault scenarios | Add a new scenario in `nexforge/scenarios/` |
-| New tests | Add tests in `tests/` to cover new domains |
-| Documentation | Translate docs, write examples, add diagrams |
-| Plugin SDK | Add a Validator or Domain Plugin via `nexforge/plugins/` |
+###  Layer 1: Hardware-level Safety (like MicroSafe-RL)
+- **Task:** Write a generator that translates NexForge YAML contracts (velocity, torque, current limits) into C++ configuration files or inline clipping code for real‑time microcontrollers (ESP32, STM32).
+  
+- **Skills needed:** C++, embedded systems, real‑time constraints, familiarity with safety‑critical code.
+- **Good first issue:** Start by exporting a simple `max_speed` limit as a `#define` in a C header.
 
-### ⚠️ Areas requiring caution (do not modify without deep understanding)
+###  Layer 2: Communication Infrastructure (like safe_drive for ROS2 or DDS)
+- **Task:** Write a generator that takes NexForge contracts (deadlines, message authentication, node health) and produces Rust code that integrates with `safe_drive` or a generic DDS safety wrapper.
+- **Skills needed:** Rust (or C++), ROS2, DDS, real‑time communication protocols.
+- **Good first issue:** Generate a `liveliness` contract that checks if a ROS2 node sends heartbeats on time.
 
-| Area | Why caution |
-|------|-------------|
-| Hard core (`nexforge/compiler/`, `nexforge/runtime/safety.py`) | Any error here affects determinism and safety. |
-| IR Schema (`nexforge/compiler/ir.py`) | Changing it will impact all domains. |
-| Safe Evaluator (`nexforge/compiler/expr.py`) | Any vulnerability here is a security risk. |
+###  Layer 3: High‑level Orchestration (like apyrobo)
+- **Task:** Write a generator that translates NexForge contracts (skill sequencing, resource locking, emergency stops) into configuration files or Python/C++ code for skill‑based execution frameworks (apyrobo, Behavior Trees, etc.).
+- **Skills needed:** Python or C++, state machines, task planning, ROS2 (optional).
+- **Good first issue:** Export a simple “mutual exclusion” contract between two skills as a `Semaphore` in apyrobo config.
 
-**Golden rule:** If your change would alter the core behavior for all domains, open an Issue first for discussion.
+---
+
+## 👤 Not a specialist in these layers? You can still help!
+
+- Add new YAML domains (elevator, drone, medical device, etc.) – no core changes needed.
+- Write fault scenarios or unit tests.
+- Improve documentation or create diagrams.
+- Review and discuss open issues.
+
+---
+
+##  How to start?
+
+1. Pick a layer that matches your skills.
+2. Check the `good first issue` label on GitHub.
+3. Join the discussion in Issues or start a new one.
+
+**NexForge is the only open project unifying safety across hardware, communication, and orchestration. Your contribution will define how Physical AI is constrained.**
+```
 
 ---
 
