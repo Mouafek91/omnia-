@@ -8,7 +8,7 @@ NexForge is a compiler + fixed safety kernel that transforms a high-level system
 
 Core Idea:
 
-Architecture Engineering > Prompt Engineering"
+Architecture Engineering > Prompt Engineering
 
 Instead of trusting an LLM not to hallucinate dangerous commands, we constrain it with a hard safety layer it cannot bypass. NexForge is not a replacement for ROS2, MicroSafe-RL, or apyrobo it is a specification compiler that feeds verified safety contracts into those frameworks.
 
