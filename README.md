@@ -2,8 +2,15 @@
 
 **A robust architecture to constrain artificial intelligence in Cyber-Physical Systems (CPS)**
 
-> We don't ask AI to "write safe code".
-> We place it inside a **fixed, rigid architecture** that forces it to produce deterministic, safe systems.
+What is NexForge?
+
+NexForge is a compiler + fixed safety kernel that transforms a high-level system description (YAML) into a fully verified, deterministic safety layer.
+
+Core Idea:
+
+"Architecture Engineering > Prompt Engineering"
+
+Instead of trusting an LLM not to hallucinate dangerous commands, we constrain it with a hard safety layer it cannot bypass. NexForge is not a replacement for ROS2, MicroSafe-RL, or apyrobo it is a specification compiler that feeds verified safety contracts into those frameworks.
 **Keywords:** CPS, Safety-Critical Systems, IoT Security, Embedded Systems, Formal Verification, Deterministic Compiler, Functional Safety, YAML-driven, VETO-first, Constrained Architecture, Industrial Automation, Robotics
 
 ---
@@ -186,6 +193,13 @@ python run_sim_datacenter_fan.py           # Data center fan → VETO
 > **Note:** `nexforge replay` requires the exact same YAML file used during recording. If you modify the YAML, re-record the session first.
 
 ## 👥 For Contributors
+NexForge is the only open‑source project that attempts to unify safety across:
+
+· Hardware clipping (MicroSafe‑RL style)
+· ROS 2 infrastructure (safe_drive style)
+· High‑level skill orchestration (apyrobo style)
+
+under a single, verifiable YAML specification. If you care about making physical AI safe and deterministic, this is the place to build.
 
 All contributions are welcome! The project is still in the Early Prototype stage, and your contribution will shape its future.
 
@@ -218,35 +232,19 @@ All contributions are welcome! The project is still in the Early Prototype stage
 - Compiler + Validator + Safety Engine + Simulator + Replay
 - Proof of concept demonstrated across 3 different physical domains
 
-### v7.0 (planned)
+### v7.0 — Unified Safety Layer
+- Generators for existing safety frameworks:
+  - MicroSafe-RL (hard real-time clipping)
+  - safe_drive (ROS 2 infrastructure)
+  - apyrobo (high-level skill orchestration)
+- One YAML → configurations for multiple specialized safety tools
 
-- **Multi‑Agent layer for YAML generation** (Orchestrator + DomainAgent + Reviewer…)
-  - Their only role is to collaborate on writing the best YAML.
-  - They are not allowed to touch the hard core.
-- **LLM assistant for YAML writing** (Grok / Ollama / OpenAI)
-  - Infers YAML from a description.
-- **ESP32 code generator via fixed templates** (not via AI)
-  - Ensures Dual‑Core and Safety Path.
-- **Web dashboard** (FastAPI + WebSocket + Chart.js)
+### v8.0+ (Community Driven)
+- Plugin system & SDK
+- More domains (Drone, Robotic Arm, etc.)
+- Web dashboard (optional)
+- Multi-agent YAML generation (research direction)
 
-### Long‑term goal
-
-Make NexForge a general framework for **"Constrained Agentic Architectures"**, where AI is **constrained to the role of spec writer** and the rigid architecture is the **executor and judge**.
-This principle will apply to: CPS, finance, cybersecurity, robotics…
-
----
-
-## 📜 Philosophy
-
-> "Architecture Engineering > Prompt Engineering"
-
-We don't want an unconstrained LLM that hallucinates.
-We want an LLM bound within a rigid architecture that guarantees:
-- Safety‑First
-- Determinism
-- Verifiability
-
----
 
 ## 📄 License
 
