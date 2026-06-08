@@ -11,6 +11,7 @@ Core Idea:
 "Architecture Engineering > Prompt Engineering"
 
 Instead of trusting an LLM not to hallucinate dangerous commands, we constrain it with a hard safety layer it cannot bypass. NexForge is not a replacement for ROS2, MicroSafe-RL, or apyrobo it is a specification compiler that feeds verified safety contracts into those frameworks.
+
 **Keywords:** CPS, Safety-Critical Systems, IoT Security, Embedded Systems, Formal Verification, Deterministic Compiler, Functional Safety, YAML-driven, VETO-first, Constrained Architecture, Industrial Automation, Robotics
 
 ---
