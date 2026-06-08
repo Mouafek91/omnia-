@@ -35,9 +35,9 @@ NexForge is a **compiler + hard kernel** that transforms a simple domain descrip
 
 NexForge is the only open‑source project that attempts to unify safety across:
 
-· Hardware clipping (MicroSafe‑RL style)
-· ROS 2 infrastructure (safe_drive style)
-· High‑level skill orchestration (apyrobo style)
+· Hardware-level safety (e.g., MicroSafe‑RL for embedded clipping)
+· Communication infrastructure (e.g., safe_drive for ROS2 or any real‑time middleware)
+. High‑level orchestration (e.g., apyrobo for skill‑based execution).
 
 under a single, verifiable YAML specification. If you care about making physical AI safe and deterministic, this is the place to build.
 
@@ -238,9 +238,9 @@ All contributions are welcome! The project is still in the Early Prototype stage
 
 ### v7.0 — Unified Safety Layer
 - Generators for existing safety frameworks:
-  - MicroSafe-RL (hard real-time clipping)
-  - safe_drive (ROS 2 infrastructure)
-  - apyrobo (high-level skill orchestration)
+  - Hard real‑time clipping (like   MicroSafe‑RL)
+  - Infrastructure safety (like safe_drive for ROS2 or DDS)
+  - Skill orchestration (like apyrobo)
 - One YAML → configurations for multiple specialized safety tools
 
 ### v8.0+ (Community Driven)
