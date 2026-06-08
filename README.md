@@ -31,6 +31,16 @@ NexForge is a **compiler + hard kernel** that transforms a simple domain descrip
 **All of this from a single YAML file – without writing any runtime code.**
 
 ---
+## 👥Why Contribute 
+
+NexForge is the only open‑source project that attempts to unify safety across:
+
+· Hardware clipping (MicroSafe‑RL style)
+· ROS 2 infrastructure (safe_drive style)
+· High‑level skill orchestration (apyrobo style)
+
+under a single, verifiable YAML specification. If you care about making physical AI safe and deterministic, this is the place to build.
+
 
 ## 🏗️ System Architecture
 
@@ -194,13 +204,6 @@ python run_sim_datacenter_fan.py           # Data center fan → VETO
 > **Note:** `nexforge replay` requires the exact same YAML file used during recording. If you modify the YAML, re-record the session first.
 
 ## 👥 For Contributors
-NexForge is the only open‑source project that attempts to unify safety across:
-
-· Hardware clipping (MicroSafe‑RL style)
-· ROS 2 infrastructure (safe_drive style)
-· High‑level skill orchestration (apyrobo style)
-
-under a single, verifiable YAML specification. If you care about making physical AI safe and deterministic, this is the place to build.
 
 All contributions are welcome! The project is still in the Early Prototype stage, and your contribution will shape its future.
 
